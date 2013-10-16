@@ -5,10 +5,11 @@ set -eux
 mkdir -p out
 
 zlib=~/sw/zlib-1.2.3.3.dfsg
+cflags="-Wall -Werror -g"
 
 files="inflate inftrees inffast adler32 crc32 zutil"
 for file in $files; do
-  gcc -Wall -c -fPIC $zlib/$file.c -o out/$file.o
+  gcc $cflags -c -fPIC $zlib/$file.c -o out/$file.o
 done
 ld -r $(for f in $files; do echo out/$f.o; done) -o out/zlib.o
 
@@ -23,7 +24,7 @@ for sym in inflateInit_ inflateInit2_ inflate inflateReset inflateEnd; do
 done
 objcopy $args out/zlib.o out/zlib_hidden.o
 
-gcc -Wall -Werror -shared -fPIC zlib_proxy.c out/zlib_hidden.o \
+gcc $cflags -shared -fPIC zlib_proxy.c out/zlib_hidden.o \
     -o out/zlib_proxy.so
 
 
