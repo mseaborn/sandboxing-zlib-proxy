@@ -29,21 +29,38 @@ int inflateInit2_(z_stream *stream, int window_bits,
 
 int inflate(z_stream *stream, int flush) {
   fprintf(stderr, "inflate()\n");
+
+  uint8_t *next_in = stream->next_in;
+  size_t avail_in = stream->avail_in;
   uint8_t *next_out = stream->next_out;
   size_t avail_out = stream->avail_out;
 
-  uint8_t *buf = malloc(avail_out);
-  assert(buf);
-  stream->next_out = buf;
+  uint8_t *input_buf = malloc(avail_in);
+  assert(input_buf);
+  memcpy(input_buf, next_in, avail_in);
+  stream->next_in = input_buf;
+
+  uint8_t *output_buf = malloc(avail_out);
+  assert(output_buf);
+  stream->next_out = output_buf;
 
   int result = wrap_inflate(stream, flush);
-  size_t written = stream->next_out - buf;
+
+  size_t bytes_read = stream->next_in - input_buf;
+  assert(bytes_read <= avail_in);
+  assert(bytes_read == avail_in - stream->avail_in);
+  free(input_buf);
+  stream->next_in = next_in + bytes_read;
+  stream->avail_in = avail_in - bytes_read;
+
+  size_t written = stream->next_out - output_buf;
   assert(written <= avail_out);
   assert(written == avail_out - stream->avail_out);
-  memcpy(next_out, buf, written);
-  free(buf);
+  memcpy(next_out, output_buf, written);
+  free(output_buf);
   stream->next_out = next_out + written;
   stream->avail_out = avail_out - written;
+
   return result;
 }
 
