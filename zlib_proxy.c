@@ -53,13 +53,13 @@ int inflate(z_stream *stream, int flush) {
   stream->next_in = next_in + bytes_read;
   stream->avail_in = avail_in - bytes_read;
 
-  size_t written = stream->next_out - output_buf;
-  assert(written <= avail_out);
-  assert(written == avail_out - stream->avail_out);
-  memcpy(next_out, output_buf, written);
+  size_t bytes_written = stream->next_out - output_buf;
+  assert(bytes_written <= avail_out);
+  assert(bytes_written == avail_out - stream->avail_out);
+  memcpy(next_out, output_buf, bytes_written);
   free(output_buf);
-  stream->next_out = next_out + written;
-  stream->avail_out = avail_out - written;
+  stream->next_out = next_out + bytes_written;
+  stream->avail_out = avail_out - bytes_written;
 
   return result;
 }
