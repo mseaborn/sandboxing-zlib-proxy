@@ -13,7 +13,7 @@ for file in $files; do
   gcc $cflags -c -fPIC $zlib/$file.c -o out/$file.o
   pnacl-clang $cflags -c -fPIC $zlib/$file.c -o out/$file.p.o
 done
-ld -r $(for f in $files; do echo out/$f.o; done) -o out/zlib.o
+ld -r $(for f in $files; do echo out/$f.o; done) -o out/zlib_nosandbox.o
 
 pnacl-clang $cflags -c sfi_stack_ptr.c -o out/sfi_stack_ptr.p.o
 pnacl-clang $cflags -c zlib_untrusted.c -o out/zlib_untrusted.p.o -I$zlib
@@ -40,6 +40,13 @@ objcopy $args -G z_inflate_create -G z_inflate_init -G z_inflate_init2 \
 
 gcc $cflags -shared -fPIC -Wl,-z,defs zlib_proxy.c out/zlib_hidden.o \
     -o out/zlib_proxy.so
+
+
+# Build non-sandboxing version.
+objcopy $args out/zlib_nosandbox.o out/zlib_hidden_nosandbox.o
+gcc $cflags -shared -fPIC -Wl,-z,defs \
+    zlib_proxy_nosandbox.c out/zlib_hidden_nosandbox.o \
+    -o out/zlib_proxy_nosandbox.so
 
 
 # Test decompression.
