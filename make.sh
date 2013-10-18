@@ -34,7 +34,7 @@ args=""
 for sym in inflateInit_ inflateInit2_ inflate inflateReset inflateEnd; do
   args="$args -G wrap_$sym --redefine-sym $sym=wrap_$sym"
 done
-objcopy $args -G z_inflate_create -G z_inflate_init2 \
+objcopy $args -G z_inflate_create -G z_inflate_init -G z_inflate_init2 \
     -G __sfi_data_segment -G __sfi_data_segment_size \
     out/zlib.o out/zlib_hidden.o
 

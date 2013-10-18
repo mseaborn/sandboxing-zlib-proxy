@@ -62,7 +62,8 @@ static void copy_out(void *dest, sb_ptr_t src, size_t size) {
 }
 
 static void init_sandbox() {
-  assert(__sfi_memory_base == 0);
+  if (__sfi_memory_base != 0)
+    return;
 
   size_t sandbox_size = (size_t) 1 << 32;
   void *alloc = mmap(NULL, sandbox_size, PROT_READ | PROT_WRITE,
@@ -77,8 +78,11 @@ static void init_sandbox() {
 int inflateInit_(z_stream *stream, const char *version, int stream_size) {
   fprintf(stderr, "inflateInit_()\n");
 
-  fprintf(stderr, "not implemented\n");
-  abort();
+  init_sandbox();
+
+  z_stream *state = z_inflate_create();
+  stream->state = (void *) state;
+  return z_inflate_init(state);
 }
 
 int inflateInit2_(z_stream *stream, int window_bits,

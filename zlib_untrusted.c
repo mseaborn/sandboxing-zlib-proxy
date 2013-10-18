@@ -26,6 +26,10 @@ z_stream *z_inflate_create(void) {
   return stream;
 }
 
+int z_inflate_init(z_stream *stream) {
+  return inflateInit(stream);
+}
+
 int z_inflate_init2(z_stream *stream, int window_bits) {
   return inflateInit2(stream, window_bits);
 }
