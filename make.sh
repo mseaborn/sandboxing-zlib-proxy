@@ -50,13 +50,25 @@ gcc $cflags -shared -fPIC -Wl,-z,defs \
 
 
 # Test decompression.
+function decompress_sandbox {
+  LD_PRELOAD=out/zlib_proxy.so ../zlib/decompress
+}
+function decompress_nosandbox {
+  LD_PRELOAD=out/zlib_proxy_nosandbox.so ../zlib/decompress
+}
+
 testfile=/usr/share/common-licenses/GPL-3
 hash=$(cat $testfile | sha1sum -)
 gzip -c $testfile > out/input.gz
-LD_PRELOAD=out/zlib_proxy.so ../zlib/decompress < out/input.gz > out/result
-hash2=$(cat out/result | sha1sum -)
-if [ "$hash" != "$hash2" ]; then
-  echo mismatch: $hash $hash2
-  exit 1
-fi
+
+function test_decompress {
+  "$@" < out/input.gz > out/result
+  hash2=$(cat out/result | sha1sum -)
+  if [ "$hash" != "$hash2" ]; then
+    echo mismatch: $hash $hash2
+    exit 1
+  fi
+}
+test_decompress decompress_nosandbox
+test_decompress decompress_sandbox
 echo PASS
