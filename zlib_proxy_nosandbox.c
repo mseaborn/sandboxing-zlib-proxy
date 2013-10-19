@@ -17,6 +17,10 @@ typeof(inflateEnd) wrap_inflateEnd;
 
 struct state {
   z_stream stream;
+
+  uint8_t *input_buf;  /* Buffer allocated by proxy */
+  uint8_t *expect_next_in;  /* Data provided by proxy's client */
+  size_t expect_avail_in;
 };
 
 
@@ -53,11 +57,19 @@ int inflate(z_stream *stream, int flush) {
   uint8_t *next_out = stream->next_out;
   size_t avail_out = stream->avail_out;
 
-  uint8_t *input_buf = malloc(avail_in);
-  assert(input_buf);
-  memcpy(input_buf, next_in, avail_in);
-  state->stream.next_in = input_buf;
-  state->stream.avail_in = avail_in;
+  if (state->input_buf != NULL) {
+    assert(next_in == state->expect_next_in);
+    assert(avail_in == state->expect_avail_in);
+  } else {
+    state->input_buf = malloc(avail_in);
+    assert(state->input_buf);
+    memcpy(state->input_buf, next_in, avail_in);
+    state->stream.next_in = state->input_buf;
+    state->stream.avail_in = avail_in;
+    state->expect_next_in = next_in;
+    state->expect_avail_in = avail_in;
+  }
+  uint8_t *next_in_before = state->stream.next_in;
 
   uint8_t *output_buf = malloc(avail_out);
   assert(output_buf);
@@ -66,12 +78,17 @@ int inflate(z_stream *stream, int flush) {
 
   int result = wrap_inflate(&state->stream, flush);
 
-  size_t bytes_read = state->stream.next_in - input_buf;
+  size_t bytes_read = state->stream.next_in - next_in_before;
   assert(bytes_read <= avail_in);
   assert(bytes_read == avail_in - state->stream.avail_in);
-  free(input_buf);
   stream->next_in = next_in + bytes_read;
   stream->avail_in = avail_in - bytes_read;
+  state->expect_next_in += bytes_read;
+  state->expect_avail_in -= bytes_read;
+  if (state->expect_avail_in == 0) {
+    free(state->input_buf);
+    state->input_buf = NULL;
+  }
 
   size_t bytes_written = state->stream.next_out - output_buf;
   assert(bytes_written <= avail_out);
@@ -102,5 +119,6 @@ int inflateEnd(z_stream *stream) {
   fprintf(stderr, "inflateEnd()\n");
 
   struct state *state = (void *) stream->state;
+  free(state->input_buf);
   return wrap_inflateEnd(&state->stream);
 }
