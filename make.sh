@@ -4,7 +4,7 @@ set -eux
 
 mkdir -p out
 
-zlib=~/sw/zlib-1.2.3.3.dfsg
+zlib=zlib_subset
 tc_bin=~/devel/nacl-git3/native_client/toolchain/pnacl_linux_x86/host_x86_64/bin
 cflags="-Wall -Werror -g -O2"
 
