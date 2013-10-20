@@ -241,9 +241,19 @@ extern z_const char * const z_errmsg[10]; /* indexed by 2-zlib_error */
    void ZLIB_INTERNAL zcfree  OF((voidpf opaque, voidpf ptr));
 #endif
 
+/* @LOCALMOD-START */
+/* Avoid indirect function calls because our SFI sandbox doesn't
+ * support them yet. */
+#if 0
 #define ZALLOC(strm, items, size) \
            (*((strm)->zalloc))((strm)->opaque, (items), (size))
 #define ZFREE(strm, addr)  (*((strm)->zfree))((strm)->opaque, (voidpf)(addr))
+#endif
+
+#define ZALLOC(strm, items, size) malloc((items) * (size))
+#define ZFREE(strm, addr) free(addr)
+/* @LOCALMOD-END */
+
 #define TRY_FREE(s, p) {if (p) ZFREE(s, p);}
 
 /* Reverse the bytes in a 32-bit value */
