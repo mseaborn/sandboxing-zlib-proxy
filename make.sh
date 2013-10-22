@@ -50,11 +50,13 @@ gcc $cflags -shared -fPIC -Wl,-z,defs \
 
 
 # Test decompression.
+gcc $cflags decompress.c -lz -o out/decompress
+
 function decompress_sandbox {
-  LD_PRELOAD=out/zlib_proxy.so ../zlib/decompress
+  LD_PRELOAD=out/zlib_proxy.so out/decompress
 }
 function decompress_nosandbox {
-  LD_PRELOAD=out/zlib_proxy_nosandbox.so ../zlib/decompress
+  LD_PRELOAD=out/zlib_proxy_nosandbox.so out/decompress
 }
 
 testfile=/usr/share/common-licenses/GPL-3
