@@ -7,6 +7,9 @@
 #include <zlib.h>
 
 
+/* Use 32k to match gzip. */
+#define BUFFER_SIZE (32 * 1024)
+
 int main(int argc, char **argv) {
   FILE *fp = stdin;
   z_stream stream;
@@ -29,7 +32,7 @@ int main(int argc, char **argv) {
   assert(err == Z_OK);
 
   do {
-    uint8_t input_buf[200];
+    uint8_t input_buf[BUFFER_SIZE];
     int got = fread(input_buf, 1, sizeof(input_buf), fp);
     assert(got != 0);
     assert(!ferror(fp));
@@ -37,7 +40,7 @@ int main(int argc, char **argv) {
     stream.avail_in = got;
 
     do {
-      uint8_t out_buf[200];
+      uint8_t out_buf[BUFFER_SIZE];
       stream.next_out = out_buf;
       stream.avail_out = sizeof(out_buf);
       err = inflate(&stream, Z_NO_FLUSH);
