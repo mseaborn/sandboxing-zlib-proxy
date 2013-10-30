@@ -1,6 +1,5 @@
 
 #include <assert.h>
-#include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -76,8 +75,6 @@ static void init_sandbox() {
 
 
 int inflateInit_(z_stream *stream, const char *version, int stream_size) {
-  fprintf(stderr, "inflateInit_()\n");
-
   init_sandbox();
 
   z_stream *state = z_inflate_create();
@@ -87,8 +84,6 @@ int inflateInit_(z_stream *stream, const char *version, int stream_size) {
 
 int inflateInit2_(z_stream *stream, int window_bits,
                   const char *version, int stream_size) {
-  fprintf(stderr, "inflateInit2_()\n");
-
   init_sandbox();
 
   z_stream *state = z_inflate_create();
@@ -97,8 +92,6 @@ int inflateInit2_(z_stream *stream, int window_bits,
 }
 
 int inflate(z_stream *stream, int flush) {
-  fprintf(stderr, "inflate()\n");
-
   struct z_stream_sb *state =
       (void *) (__sfi_memory_base + (uintptr_t) stream->state);
 
@@ -145,15 +138,11 @@ int inflate(z_stream *stream, int flush) {
 }
 
 int inflateReset(z_stream *stream) {
-  fprintf(stderr, "inflateReset()\n");
-
   z_stream *state = (void *) stream->state;
   return wrap_inflateReset(state);
 }
 
 int inflateEnd(z_stream *stream) {
-  fprintf(stderr, "inflateEnd()\n");
-
   z_stream *state = (void *) stream->state;
   return wrap_inflateEnd(state);
 }

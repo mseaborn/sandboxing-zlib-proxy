@@ -1,6 +1,5 @@
 
 #include <assert.h>
-#include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -33,23 +32,17 @@ static struct state *stream_init(z_stream *stream) {
 }
 
 int inflateInit_(z_stream *stream, const char *version, int stream_size) {
-  fprintf(stderr, "inflateInit_()\n");
-
   struct state *state = stream_init(stream);
   return wrap_inflateInit_(&state->stream, version, stream_size);
 }
 
 int inflateInit2_(z_stream *stream, int window_bits,
                   const char *version, int stream_size) {
-  fprintf(stderr, "inflateInit2_()\n");
-
   struct state *state = stream_init(stream);
   return wrap_inflateInit2_(&state->stream, window_bits, version, stream_size);
 }
 
 int inflate(z_stream *stream, int flush) {
-  fprintf(stderr, "inflate()\n");
-
   struct state *state = (void *) stream->state;
 
   uint8_t *next_in = stream->next_in;
@@ -109,15 +102,11 @@ int inflate(z_stream *stream, int flush) {
 }
 
 int inflateReset(z_stream *stream) {
-  fprintf(stderr, "inflateReset()\n");
-
   struct state *state = (void *) stream->state;
   return wrap_inflateReset(&state->stream);
 }
 
 int inflateEnd(z_stream *stream) {
-  fprintf(stderr, "inflateEnd()\n");
-
   struct state *state = (void *) stream->state;
   free(state->input_buf);
   return wrap_inflateEnd(&state->stream);
