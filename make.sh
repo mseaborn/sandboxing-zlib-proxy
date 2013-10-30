@@ -51,6 +51,7 @@ gcc $cflags -shared -fPIC -Wl,-z,defs \
 
 # Test decompression.
 gcc $cflags decompress.c -lz -o out/decompress
+gcc $cflags decompress_timer.c -lz -lrt -o out/decompress_timer
 
 function decompress_sandbox {
   LD_PRELOAD=out/zlib_proxy.so out/decompress
